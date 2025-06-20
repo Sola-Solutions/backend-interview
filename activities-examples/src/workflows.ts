@@ -1,9 +1,10 @@
-import { proxyActivities } from '@temporalio/workflow';
+import { ApplicationFailure, proxyActivities } from '@temporalio/workflow';
 import type * as activities from './activities';
 
 const {
   makeHTTPRequest,
-  completeSomethingAsync,
+  generateCoin,
+  flipCoin,
   // cancellableFetch  // todo: demo usage
 } = proxyActivities<typeof activities>({
   retry: {
@@ -18,7 +19,17 @@ export async function httpWorkflow(): Promise<string> {
   return `The answer is ${answer}`;
 }
 
-export async function asyncActivityWorkflow(): Promise<string> {
-  const answer = await completeSomethingAsync();
-  return `The Peon says: ${answer}`;
+export async function ExecuteCoinFlipsAndRequireTwoHeads(): Promise<{ success: boolean }> {
+  const numberOfFlips = 2;
+  const coin = await generateCoin();
+
+  for (let i = 0; i < numberOfFlips; i++) {
+    const result = await flipCoin(coin);
+    if (result === 'tails') {
+      // Retryable error
+      throw ApplicationFailure.retryable('Got tails on coin flip');
+    }
+  }
+
+  return { success: true };
 }

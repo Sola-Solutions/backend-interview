@@ -1,23 +1,39 @@
 import { Client } from '@temporalio/client';
-import { asyncActivityWorkflow, httpWorkflow } from './workflows';
+import { ExecuteCoinFlipsAndRequireTwoHeads, httpWorkflow } from './workflows';
 
-async function run(): Promise<void> {
+async function runDefaultExamples(): Promise<void> {
   const client = new Client();
 
-  let result = await client.workflow.execute(httpWorkflow, {
+  const result = await client.workflow.execute(httpWorkflow, {
     taskQueue: 'activities-examples',
     workflowId: 'activities-examples',
   });
   console.log(result); // 'The answer is 42'
-
-  result = await client.workflow.execute(asyncActivityWorkflow, {
-    taskQueue: 'activities-examples',
-    workflowId: 'activities-examples',
-  });
-  console.log(result);
 }
 
-run().catch((err) => {
+const runCoinFlips = async () => {
+  const client = new Client();
+  const result = await client.workflow.execute(ExecuteCoinFlipsAndRequireTwoHeads, {
+    taskQueue: 'activities-examples',
+    workflowId: 'activities-examples',
+    retry: {
+      maximumAttempts: 1,
+    },
+  });
+  console.log(result);
+};
+
+const main = async () => {
+  const workflowName = process.argv.at(2);
+
+  if (workflowName === 'flipcoins') {
+    await runCoinFlips();
+  } else {
+    await runDefaultExamples();
+  }
+};
+
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
