@@ -2,7 +2,7 @@ name: Publish Worker to GHCR
 
 on:
   push:
-    branches: ['main', 'master']
+    branches: ['master']
     paths:
       - 'activities-examples/**'
       - '.github/workflows/publish-worker-ghcr.yml'
