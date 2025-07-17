@@ -17,6 +17,7 @@ permissions:
   contents: read
   packages: write
   id-token: write
+  attestations: write
 
 env:
   REGISTRY: ghcr.io
@@ -51,15 +52,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,enable=true,priority=100,format=short
-            type=raw,value=${{ github.event.inputs.image_tag || 'latest' }},enable={{is_default_branch}}
+            type=raw,value=latest
           labels: |
             org.opencontainers.image.title=Temporal Worker
             org.opencontainers.image.description=Temporal worker for activities examples
             org.opencontainers.image.vendor=Sola Solutions
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
 
       - name: Build and push Docker image
         id: build
