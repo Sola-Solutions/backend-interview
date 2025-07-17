@@ -17,6 +17,7 @@ permissions:
   contents: read
   packages: write
   id-token: write
+  attestations: write
 
 env:
   REGISTRY: ghcr.io
@@ -60,6 +61,7 @@ jobs:
             org.opencontainers.image.description=Temporal worker for activities examples
             org.opencontainers.image.vendor=Sola Solutions
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
 
       - name: Build and push Docker image
         id: build
@@ -80,3 +82,14 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+      - name: Make package public
+        run: |
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /orgs/Sola-Solutions/packages/container/backend-interview%2Ftemporal-worker \
+            -f visibility='public'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
