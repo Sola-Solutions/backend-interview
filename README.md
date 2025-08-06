@@ -27,11 +27,11 @@ grpcurl -plaintext localhost:7233 list
 
 3. Navigate to `localhost:8080` to see the temporal UI.
 
-# Task
+# Setup Task
 Deploy the Temporal Services described in `docker-compose.yml` to your local kubernetes cluster
 
 # Running a Temporal Workflow
-1. `cd activities-example`
+1. `cd activities-examples`
 2. `npm install` to install dependencies.
 3. `npm run start.watch` to start the Worker.
 4. In another shell, `npm run workflow` to run the Workflow.
