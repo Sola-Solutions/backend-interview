@@ -13,7 +13,7 @@ Install one of tools for kubernetes for local development:
 or some other k8s emulator suitable for *local* development.
 
 
-# Try out Temporal with docker-compose
+# Setup: Try out Temporal setup with docker-compose
 1. Spin up services
 ```
 docker-compose up
@@ -27,10 +27,12 @@ grpcurl -plaintext localhost:7233 list
 
 3. Navigate to `localhost:8080` to see the temporal UI.
 
-# Setup Task
-Deploy the Temporal Services described in `docker-compose.yml` to your local kubernetes cluster
+# Prework Task: Convert Docker Compose to Kubernetes
+Prework task: **deploy the Temporal Services described in `docker-compose.yml` to your local kubernetes cluster**.
 
-# Running a Temporal Workflow
+Come prepared to explain how you set it up and why.
+
+# Validate: Run a Temporal Workflow
 1. `cd activities-examples`
 2. `npm install` to install dependencies.
 3. `npm run start.watch` to start the Worker.
