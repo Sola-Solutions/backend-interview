@@ -1,5 +1,15 @@
 FROM node:bookworm-slim
 
+# node:bookworm-slim ships without the ca-certificates package, so /etc/ssl/certs
+# is empty. The Temporal SDK's native gRPC core (Rust/tonic via rustls-native-certs)
+# loads the OS trust store to verify Temporal Cloud's TLS certificate; without it
+# the worker dies on startup with:
+#   TransportError: tonic::transport::Error(Transport, NativeCertsNotFound)
+# Install the CA bundle so the worker can establish its TLS connection.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set the working directory inside the container
 WORKDIR /app
 
