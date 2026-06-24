@@ -14,7 +14,7 @@ const {
   WORKER_VERSION,
 } = process.env;
 
-const demo = 'activities-examples';
+const TASK_QUEUE = 'demo';
 
 // In-cluster the worker-controller injects TEMPORAL_ADDRESS / _NAMESPACE /
 // _API_KEY from the Connection resource. Locally these are unset, so we return
@@ -61,12 +61,12 @@ async function run() {
     namespace: TEMPORAL_NAMESPACE,
     workflowsPath: require.resolve('./workflows'),
     activities,
-    taskQueue: demo,
+    taskQueue: TASK_QUEUE,
     workerDeploymentOptions,
   });
 
   console.log(
-    `Worker starting on task queue "${demo}" (version ${WORKER_VERSION ?? 'v1'})` +
+    `Worker starting on task queue "${TASK_QUEUE}" (version ${WORKER_VERSION ?? 'v1'})` +
       (workerDeploymentOptions
         ? ` [versioned: ${TEMPORAL_DEPLOYMENT_NAME}.${TEMPORAL_WORKER_BUILD_ID}]`
         : ' [unversioned]'),
