@@ -35,9 +35,14 @@ async function connect(): Promise<NativeConnection | undefined> {
 // Opt into Worker Versioning (Worker Deployments) when the controller has
 // assigned this pod a deployment name + build id. PINNED keeps each workflow on
 // the version that started it, so a rollout never breaks running workflows.
-// Returns undefined locally (and in any unversioned deployment), leaving the
-// worker unversioned.
+// Returns undefined — leaving the worker unversioned — when WORKER_VERSION is
+// unset or explicitly "unversioned", or when the controller hasn't injected a
+// deployment name + build id (e.g. local dev).
 function getWorkerDeploymentOptions(): WorkerDeploymentOptions | undefined {
+  if (!WORKER_VERSION || WORKER_VERSION === 'unversioned') {
+    return undefined;
+  }
+
   if (!TEMPORAL_DEPLOYMENT_NAME || !TEMPORAL_WORKER_BUILD_ID) {
     return undefined;
   }
