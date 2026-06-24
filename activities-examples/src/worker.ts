@@ -16,6 +16,26 @@ const {
 
 const TASK_QUEUE = 'activities-examples';
 
+// Opt into Worker Versioning (Worker Deployments) when the controller has
+// assigned this pod a deployment name + build id. PINNED keeps each workflow on
+// the version that started it, so a rollout never breaks running workflows.
+// Returns undefined locally (and in any unversioned deployment), leaving the
+// worker unversioned.
+function getWorkerDeploymentOptions(): WorkerDeploymentOptions | undefined {
+  if (!TEMPORAL_DEPLOYMENT_NAME || !TEMPORAL_WORKER_BUILD_ID) {
+    return undefined;
+  }
+
+  return {
+    useWorkerVersioning: true,
+    version: {
+      deploymentName: TEMPORAL_DEPLOYMENT_NAME,
+      buildId: TEMPORAL_WORKER_BUILD_ID,
+    },
+    defaultVersioningBehavior: 'PINNED',
+  };
+}
+
 async function run() {
   // In-cluster the worker-controller injects TEMPORAL_ADDRESS / _NAMESPACE /
   // _API_KEY from the Connection resource. Locally these are unset and we fall
@@ -29,20 +49,7 @@ async function run() {
       })
     : undefined;
 
-  // Opt into Worker Versioning (Worker Deployments) when the controller has
-  // assigned this pod a deployment name + build id. PINNED keeps each workflow
-  // on the version that started it, so a rollout never breaks running workflows.
-  const workerDeploymentOptions: WorkerDeploymentOptions | undefined =
-    TEMPORAL_DEPLOYMENT_NAME && TEMPORAL_WORKER_BUILD_ID
-      ? {
-          useWorkerVersioning: true,
-          version: {
-            deploymentName: TEMPORAL_DEPLOYMENT_NAME,
-            buildId: TEMPORAL_WORKER_BUILD_ID,
-          },
-          defaultVersioningBehavior: 'PINNED',
-        }
-      : undefined;
+  const workerDeploymentOptions = getWorkerDeploymentOptions();
 
   const worker = await Worker.create({
     connection,
