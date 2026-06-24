@@ -60,11 +60,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          # `:<version>` is a moving label; `:<version>-<sha>` is the immutable
-          # tag the controller turns into a Build ID. v2 is also tagged `latest`.
+          # One tag per version: unversioned / v1 / v2. v2 is also tagged latest.
           tags: |
             type=raw,value=${{ matrix.version }}
-            type=sha,prefix=${{ matrix.version }}-,format=short
             type=raw,value=latest,enable=${{ matrix.version == 'v2' }}
           labels: |
             org.opencontainers.image.title=Temporal Worker (${{ matrix.version }})
@@ -102,14 +100,13 @@ jobs:
           name: Temporal Worker ${{ matrix.version }}
           make_latest: ${{ matrix.version == 'v2' }}
           body: |
-            Temporal worker image — workflows variant **${{ matrix.version }}**.
+            Temporal worker image — version **${{ matrix.version }}**.
 
             ```
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}-${{ github.sha }}
             ```
 
-            Digest: `${{ steps.build.outputs.digest }}`
+            Digest (immutable): `${{ steps.build.outputs.digest }}`
 
             Roll between versions with the temporal-worker-controller by pointing
             the WorkerDeployment's image at the desired tag.
