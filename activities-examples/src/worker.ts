@@ -9,8 +9,9 @@ const {
   // Injected by the temporal-worker-controller for versioned workers.
   TEMPORAL_DEPLOYMENT_NAME,
   TEMPORAL_WORKER_BUILD_ID,
-  // Selects which workflow bundle this image ships (see Dockerfile / CI matrix).
-  WORKFLOWS_VARIANT,
+  // Baked into the image per version (see Dockerfile / CI matrix); the
+  // makeHTTPRequest activity stamps its answer with this.
+  WORKER_VERSION,
 } = process.env;
 
 const TASK_QUEUE = 'activities-examples';
@@ -46,20 +47,17 @@ async function run() {
   const worker = await Worker.create({
     connection,
     namespace: TEMPORAL_NAMESPACE,
-    workflowsPath:
-      WORKFLOWS_VARIANT === 'v2' ? require.resolve('./workflows.v2') : require.resolve('./workflows'),
+    workflowsPath: require.resolve('./workflows'),
     activities,
     taskQueue: TASK_QUEUE,
     workerDeploymentOptions,
   });
 
   console.log(
-    `Worker starting on task queue "${TASK_QUEUE}"` +
+    `Worker starting on task queue "${TASK_QUEUE}" (version ${WORKER_VERSION ?? 'v1'})` +
       (workerDeploymentOptions
-        ? ` (versioned: ${TEMPORAL_DEPLOYMENT_NAME}.${TEMPORAL_WORKER_BUILD_ID}, workflows=${
-            WORKFLOWS_VARIANT ?? 'v1'
-          })`
-        : ' (unversioned)'),
+        ? ` [versioned: ${TEMPORAL_DEPLOYMENT_NAME}.${TEMPORAL_WORKER_BUILD_ID}]`
+        : ' [unversioned]'),
   );
 
   await worker.run();

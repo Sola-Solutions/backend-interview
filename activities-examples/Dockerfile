@@ -15,10 +15,11 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Which workflow bundle this image ships: "v1" (default) or "v2". The CI matrix
-# builds one image per variant so the worker-controller can roll between them.
-ARG WORKFLOWS_VARIANT=v1
-ENV WORKFLOWS_VARIANT=$WORKFLOWS_VARIANT
+# Worker version baked into the image: "v1" (default) or "v2". The CI matrix
+# builds one image per version; the makeHTTPRequest activity stamps its answer
+# with this so the worker-controller can roll between them observably.
+ARG WORKER_VERSION=v1
+ENV WORKER_VERSION=$WORKER_VERSION
 
 # Start the application
 CMD ["node", "lib/worker.js"]

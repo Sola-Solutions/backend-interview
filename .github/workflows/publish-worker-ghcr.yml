@@ -23,9 +23,9 @@ jobs:
     name: Build and Publish Worker (${{ matrix.version }})
     runs-on: ubuntu-latest
 
-    # Build one image per workflow variant so the temporal-worker-controller can
-    # roll between them. Each variant ships a different workflow bundle (selected
-    # by the WORKFLOWS_VARIANT build arg) and is published under its own tag.
+    # Build one image per worker version so the temporal-worker-controller can
+    # roll between them. The version is passed via the WORKER_VERSION build arg;
+    # the makeHTTPRequest activity stamps its answer with it.
     strategy:
       fail-fast: false
       matrix:
@@ -79,7 +79,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            WORKFLOWS_VARIANT=${{ matrix.version }}
+            WORKER_VERSION=${{ matrix.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=temporal-worker-${{ matrix.version }}
