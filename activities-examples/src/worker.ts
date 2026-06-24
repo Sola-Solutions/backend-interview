@@ -16,6 +16,22 @@ const {
 
 const TASK_QUEUE = 'activities-examples';
 
+// In-cluster the worker-controller injects TEMPORAL_ADDRESS / _NAMESPACE /
+// _API_KEY from the Connection resource. Locally these are unset, so we return
+// undefined and let the SDK fall back to its default (localhost:7233, no TLS).
+async function connect(): Promise<NativeConnection | undefined> {
+  if (!TEMPORAL_ADDRESS) {
+    return undefined;
+  }
+
+  return NativeConnection.connect({
+    address: TEMPORAL_ADDRESS,
+    // Temporal Cloud requires TLS; an API key implies it.
+    tls: TEMPORAL_API_KEY || TEMPORAL_TLS === 'true' ? true : undefined,
+    apiKey: TEMPORAL_API_KEY || undefined,
+  });
+}
+
 // Opt into Worker Versioning (Worker Deployments) when the controller has
 // assigned this pod a deployment name + build id. PINNED keeps each workflow on
 // the version that started it, so a rollout never breaks running workflows.
@@ -37,18 +53,7 @@ function getWorkerDeploymentOptions(): WorkerDeploymentOptions | undefined {
 }
 
 async function run() {
-  // In-cluster the worker-controller injects TEMPORAL_ADDRESS / _NAMESPACE /
-  // _API_KEY from the Connection resource. Locally these are unset and we fall
-  // back to the SDK default (localhost:7233, no TLS).
-  const connection = TEMPORAL_ADDRESS
-    ? await NativeConnection.connect({
-        address: TEMPORAL_ADDRESS,
-        // Temporal Cloud requires TLS; an API key implies it.
-        tls: TEMPORAL_API_KEY || TEMPORAL_TLS === 'true' ? true : undefined,
-        apiKey: TEMPORAL_API_KEY || undefined,
-      })
-    : undefined;
-
+  const connection = await connect();
   const workerDeploymentOptions = getWorkerDeploymentOptions();
 
   const worker = await Worker.create({
