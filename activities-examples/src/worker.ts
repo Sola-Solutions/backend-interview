@@ -66,7 +66,7 @@ async function run() {
   });
 
   console.log(
-    `Worker starting on task queue "${TASK_QUEUE}" (version ${WORKER_VERSION ?? 'v1'})` +
+    `Worker starting on task queue "${TASK_QUEUE}" (version ${WORKER_VERSION || 'unversioned'})` +
       (workerDeploymentOptions
         ? ` [versioned: ${TEMPORAL_DEPLOYMENT_NAME}.${TEMPORAL_WORKER_BUILD_ID}]`
         : ' [unversioned]'),
