@@ -24,12 +24,15 @@ jobs:
     runs-on: ubuntu-latest
 
     # Build one image per worker version so the temporal-worker-controller can
-    # roll between them. The version is passed via the WORKER_VERSION build arg;
-    # the makeHTTPRequest activity stamps its answer with it.
+    # roll between them (the version is passed via the WORKER_VERSION build arg;
+    # the makeHTTPRequest activity stamps its answer with it). The `unversioned`
+    # image is the same code run as a plain worker — it only opts into Worker
+    # Versioning when the controller injects a deployment name + build id, so
+    # without the controller it behaves as an ordinary unversioned worker.
     strategy:
       fail-fast: false
       matrix:
-        version: [v1, v2]
+        version: [unversioned, v1, v2]
 
     steps:
       - name: Check out code
