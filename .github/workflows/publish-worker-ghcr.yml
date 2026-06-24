@@ -7,14 +7,9 @@ on:
       - 'activities-examples/**'
       - '.github/workflows/publish-worker-ghcr.yml'
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: 'Docker image tag'
-        required: false
-        default: 'latest'
 
 permissions:
-  contents: read
+  contents: write # create GitHub Releases
   packages: write
   id-token: write
   attestations: write
@@ -25,9 +20,20 @@ env:
 
 jobs:
   publish:
-    name: Build and Publish Worker Image
+    name: Build and Publish Worker (${{ matrix.version }})
     runs-on: ubuntu-latest
-    
+
+    # Build one image per worker version so the temporal-worker-controller can
+    # roll between them (the version is passed via the WORKER_VERSION build arg;
+    # the makeHTTPRequest activity stamps its answer with it). The `unversioned`
+    # image is the same code run as a plain worker — it only opts into Worker
+    # Versioning when the controller injects a deployment name + build id, so
+    # without the controller it behaves as an ordinary unversioned worker.
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [unversioned, v1, v2]
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -54,11 +60,13 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # One tag per version: unversioned / v1 / v2. v2 is also tagged latest.
           tags: |
-            type=raw,value=latest
+            type=raw,value=${{ matrix.version }}
+            type=raw,value=latest,enable=${{ matrix.version == 'v2' }}
           labels: |
-            org.opencontainers.image.title=Temporal Worker
-            org.opencontainers.image.description=Temporal worker for activities examples
+            org.opencontainers.image.title=Temporal Worker (${{ matrix.version }})
+            org.opencontainers.image.description=Temporal worker for activities examples (workflows ${{ matrix.version }})
             org.opencontainers.image.vendor=Sola Solutions
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.licenses=MIT
@@ -71,10 +79,12 @@ jobs:
           file: ./activities-examples/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            WORKER_VERSION=${{ matrix.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=temporal-worker
-          cache-to: type=gha,mode=max,scope=temporal-worker
+          cache-from: type=gha,scope=temporal-worker-${{ matrix.version }}
+          cache-to: type=gha,mode=max,scope=temporal-worker-${{ matrix.version }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
@@ -82,3 +92,21 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+      - name: Create GitHub Release for ${{ matrix.version }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: worker-${{ matrix.version }}
+          name: Temporal Worker ${{ matrix.version }}
+          make_latest: ${{ matrix.version == 'v2' }}
+          body: |
+            Temporal worker image — version **${{ matrix.version }}**.
+
+            ```
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.version }}
+            ```
+
+            Digest (immutable): `${{ steps.build.outputs.digest }}`
+
+            Roll between versions with the temporal-worker-controller by pointing
+            the WorkerDeployment's image at the desired tag.

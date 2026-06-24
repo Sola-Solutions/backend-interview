@@ -5,7 +5,7 @@ async function runDefaultExamples(): Promise<void> {
   const client = new Client();
 
   const result = await client.workflow.execute(httpWorkflow, {
-    taskQueue: 'activities-examples',
+    taskQueue: 'demo',
     workflowId: 'activities-examples',
   });
   console.log(result); // 'The answer is 42'
@@ -14,7 +14,7 @@ async function runDefaultExamples(): Promise<void> {
 const runCoinFlips = async () => {
   const client = new Client();
   const result = await client.workflow.execute(ExecuteCoinFlipsAndRequireTwoHeads, {
-    taskQueue: 'activities-examples',
+    taskQueue: 'demo',
     workflowId: 'activities-examples',
     retry: {
       maximumAttempts: 1,
