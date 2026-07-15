@@ -1,0 +1,15 @@
+{
+  "_comment": "Shared names registry (issue plan step 5). Protobuf defines the PAYLOAD schemas; it cannot express Temporal topology (workflow type names, task-queue names, signal/query names) — those stay string conventions. This one JSON is the single source of truth both languages read, so a rename can't silently drift across the TS <-> Python boundary.",
+  "taskQueues": {
+    "greeting": "greeting-poc"
+  },
+  "workflows": {
+    "greeting": "GreetingWorkflow"
+  },
+  "signals": {
+    "cheer": "cheer"
+  },
+  "queries": {
+    "status": "status"
+  }
+}

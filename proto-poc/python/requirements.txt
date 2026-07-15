@@ -1,0 +1,5 @@
+# Temporal Python SDK (ships proto payload converters + a protobuf runtime).
+temporalio>=1.7.0
+# Only needed for codegen (gen.sh): bundles protoc so no system install is
+# required. In production, `buf generate` (buf.gen.yaml) replaces this.
+grpcio-tools>=1.60.0

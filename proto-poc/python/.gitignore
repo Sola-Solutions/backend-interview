@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+# Generated protobuf code — regenerate with `bash gen.sh` (or `buf generate`).
+sola_temporal_poc/generated/

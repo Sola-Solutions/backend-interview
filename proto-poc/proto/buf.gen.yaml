@@ -1,0 +1,16 @@
+# The production codegen path (issue plan step 1). Requires `buf`.
+# This POC ships equivalent, install-free gen.sh scripts per language so it can
+# run without buf; this file shows how the same schema fans out under buf.
+#
+#   cd proto-poc/proto && buf generate
+#
+# Python is generated here via buf's managed remote plugins. TypeScript route
+# (a) — protobufjs static codegen — isn't distributed as a buf plugin, so the TS
+# side runs protobufjs-cli directly (see ../ts/gen.sh). If the team later adopts
+# route (b) (protobuf-es), TS moves under buf too via `buf.build/bufbuild/es`.
+version: v2
+plugins:
+  - remote: buf.build/protocolbuffers/python
+    out: ../python/sola_temporal_poc/generated
+  - remote: buf.build/protocolbuffers/pyi
+    out: ../python/sola_temporal_poc/generated

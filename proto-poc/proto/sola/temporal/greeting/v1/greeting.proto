@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+// One package == one Temporal domain. The fully-qualified message name
+// (e.g. "sola.temporal.greeting.v1.GreetingRequest") is what Temporal stamps
+// into each Payload's `messageType` metadata. Both the TS and Python SDKs use
+// that string to pick the right message class when decoding — that identical
+// (encoding, messageType) pair is the entire cross-language interop contract.
+package sola.temporal.greeting.v1;
+
+// Workflow / activity ARGUMENT.
+message GreetingRequest {
+  string name = 1;
+  // BCP-47-ish language tag. Unknown tags fall back to English.
+  string language = 2;
+}
+
+// Workflow / activity RETURN value.
+message GreetingResponse {
+  string message = 1;
+  // Which runtime produced this — lets the demo prove who did the work.
+  string handled_by = 2;
+  // How many cheer signals the workflow saw before completing.
+  int32 cheers_received = 3;
+}
+
+// SIGNAL payload. Temporal signals are named by string ("cheer" — see the
+// shared names registry) but their body is a typed proto message.
+message CheerSignal {
+  // `sender` not `from`: `from` is a reserved word in Python's generated code.
+  string sender = 1;
+  int32 volume = 2;
+}
+
+// QUERY result. Queries are likewise named by string ("status").
+message GreetingStatus {
+  int32 cheers_received = 1;
+  bool greeted = 2;
+}
