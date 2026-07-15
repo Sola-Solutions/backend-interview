@@ -1,0 +1,4 @@
+node_modules/
+lib/
+# Generated protobuf code — regenerate with `npm run gen` (or `buf generate`).
+src/generated/

@@ -1,0 +1,10 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}

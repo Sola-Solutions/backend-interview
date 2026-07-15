@@ -1,0 +1,18 @@
+# buf is the "production" toolchain the issue proposes: one schema source of
+# truth, lint + breaking-change checks in CI, `buf generate` into both
+# languages. This POC's gen.sh scripts don't require buf to be installed
+# (they use protobufjs-cli / grpcio-tools so it runs anywhere), but this file
+# documents the intended CI gate.
+#
+#   buf lint
+#   buf breaking --against '.git#branch=master,subdir=proto-poc/proto'
+#   buf generate
+version: v2
+modules:
+  - path: .
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE
